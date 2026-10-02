@@ -33,7 +33,7 @@ Open `index.html` in your browser. No build step or dependencies needed.
 1. Push all files to a GitHub repository.
 2. Go to **Settings → Pages**.
 3. Under **Build and deployment**, choose the `main` branch and the `/ (root)` folder, then save.
-4. Your site goes live at `https://code-huzaifa349.github.io/huzaifa-portfolio2.0`.
+4. Your site goes live at https://code-huzaifa349.github.io/huzaifa-portfolio2.0
 
 ## Customize
 - Text and links: edit `index.html`

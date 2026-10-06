@@ -10,11 +10,11 @@ if(rm)H.textContent=txt;else{let f=0;const id=setInterval(()=>{H.textContent=txt
 addEventListener('mousemove',e=>{$('#glow').style.transform=`translate(${e.clientX}px,${e.clientY}px)`});
 addEventListener('scroll',()=>{$('#bar').style.width=scrollY/(document.body.scrollHeight-innerHeight)*100+'%'});
 // reveal
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);setTimeout(()=>{e.target.style.transitionDelay=''},1400)}}),{threshold:.12});
 document.querySelectorAll('.rv').forEach((el,i)=>{el.style.transitionDelay=(i%3)*90+'ms';io.observe(el)});
 // spotlight + tilt
 document.querySelectorAll('.card').forEach(c=>{
- c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;c.style.setProperty('--x',x+'px');c.style.setProperty('--y',y+'px');if(!rm&&!c.classList.contains('feat'))c.style.transform=`perspective(800px) rotateX(${(y/r.height-.5)*-9}deg) rotateY(${(x/r.width-.5)*9}deg) translateY(-6px)`});
+ c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;c.style.setProperty('--x',x+'px');c.style.setProperty('--y',y+'px');if(!rm&&!c.classList.contains('ct-card'))c.style.transform=`perspective(800px) rotateX(${(y/r.height-.5)*-9}deg) rotateY(${(x/r.width-.5)*9}deg) translateY(-6px)`});
  c.addEventListener('mouseleave',()=>c.style.transform='')});
 // magnetic buttons
 document.querySelectorAll('.mag').forEach(b=>{b.addEventListener('mousemove',e=>{const r=b.getBoundingClientRect();if(!rm)b.style.transform=`translate(${(e.clientX-r.left-r.width/2)*.25}px,${(e.clientY-r.top-r.height/2)*.35}px)`});b.addEventListener('mouseleave',()=>b.style.transform='')});
@@ -44,19 +44,40 @@ document.querySelectorAll('.lv').forEach((lv,i)=>lv.querySelector('form').onsubm
  if(lv.querySelector('input').value.trim()===FL[i]){lv.classList.add('ok');st.textContent='Solved. Nice work.';dn.add(i);$('#pg').textContent=dn.size+'/3';
   if(dn.size===3){$('#win').style.display='block';$('#win').scrollIntoView({behavior:'smooth',block:'center'});for(let k=0;k<70;k++){const c=document.createElement('i');c.className='cf';c.style.cssText=`left:${Math.random()*100}vw;background:${['#7c5cff','#38e1ff','#ffb020','#3ddc84'][k%4]};animation-delay:${Math.random()*.8}s`;document.body.appendChild(c);setTimeout(()=>c.remove(),3600)}}}
  else st.textContent='Wrong flag. Try again.'});
-// certificate lightbox
-const lb=$('#lb'),lbi=$('#lb img');let lf;
-const openLb=e=>{const b=e.currentTarget;lbi.src=b.dataset.src;lbi.alt=b.dataset.alt||'Certificate';lf=document.activeElement;lb.classList.add('o');$('#lbx').focus()};
-const closeLb=()=>{lb.classList.remove('o');lf&&lf.focus()};
-document.querySelectorAll('[data-zoom]').forEach(b=>b.addEventListener('click',openLb));
-lb.addEventListener('click',closeLb);
-addEventListener('keydown',e=>{if(e.key==='Escape'&&lb.classList.contains('o'))closeLb()});
+// certificates: counts and filter
+const segs=document.querySelectorAll('.ct-seg');
+$('.ct-seg[data-filter="all"] b').textContent=document.querySelectorAll('.ct-card').length;
+$('.ct-seg[data-filter="verify"] b').textContent=document.querySelectorAll('.ct-card[data-verify]').length;
+segs.forEach(s=>s.addEventListener('click',()=>{
+ segs.forEach(x=>x.setAttribute('aria-pressed',x===s));
+ const only=s.dataset.filter==='verify';
+ document.querySelectorAll('.ct-card').forEach(c=>{c.hidden=only&&!c.dataset.verify});
+ document.querySelectorAll('.ct-stack').forEach(k=>{k.hidden=!k.querySelector('.ct-card:not([hidden])')});
+ document.querySelectorAll('.ct-year').forEach(y=>{y.hidden=!y.querySelector('.ct-card:not([hidden])')});
+}));
+// certificates: lightbox (buttons and arrow keys move between certificates)
+const lb=$('#lb'),lbi=$('#lbi'),lbt=$('#lbt'),lbm=$('#lbm'),lbv=$('#lbv');let lf,items=[],at=0;
+const thumbs=()=>[...document.querySelectorAll('.ct-card:not([hidden]) .ct-thumb[data-src]')];
+function showLb(i){items=thumbs();at=(i+items.length)%items.length;const d=items[at].dataset;
+ lbi.src=d.src;lbi.alt=d.alt;lbt.textContent=d.title;lbm.textContent=d.issuer+', '+d.date+' ('+(at+1)+' of '+items.length+')';
+ lbv.hidden=!d.url;if(d.url)lbv.href=d.url}
+function openLb(card){lf=document.activeElement;showLb(thumbs().indexOf(card.querySelector('.ct-thumb')));lb.classList.add('o');$('#lbx').focus()}
+function closeLb(){lb.classList.remove('o');lf&&lf.focus()}
+document.querySelectorAll('[data-zoom]').forEach(b=>b.addEventListener('click',()=>openLb(b.closest('.ct-card'))));
+lb.addEventListener('click',e=>{if(e.target===lb)closeLb()});
+$('#lbx').onclick=closeLb;$('#lbp').onclick=()=>showLb(at-1);$('#lbn').onclick=()=>showLb(at+1);
+addEventListener('keydown',e=>{if(!lb.classList.contains('o'))return;
+ if(e.key==='Escape')closeLb();
+ else if(e.key==='ArrowLeft')showLb(at-1);
+ else if(e.key==='ArrowRight')showLb(at+1);
+ else if(e.key==='Tab'){const f=[...lb.querySelectorAll('button,a[href]')].filter(x=>!x.hidden),i=f.indexOf(document.activeElement);
+  if(e.shiftKey&&i<=0){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&i===f.length-1){e.preventDefault();f[0].focus()}}});
 // terminal
 const out=$('#out'),cmd=$('#cmd'),A=t=>`<span class="c">${t}</span>`,E=s=>s.replace(/</g,'&lt;');
 const C={help:()=>`Commands: ${['about','skills','certs','projects','contact','scan','clear'].map(A).join(' ')}`,
 about:()=>`<b>Muhammad Huzaifa Khan</b>\nStudent, Hyderabad, Pakistan.\nGoal: Full-Stack Developer + Ethical Hacker.`,
 skills:()=>`<b>Build</b>  HTML, CSS, JS, Tailwind, Firebase, Git\n<b>Secure</b> Kali, Termux, Gobuster, ExifTool`,
-certs:()=>`9 certificates (Nov 2023 to Oct 2026):\nTestDome HTML/CSS (top 25%), Simplilearn Ethical Hacking 101, WsCube Ethical Hacking masterclass, UrduCourses CyberSavvy, TryHackMe x2, Google, Cisco, (ISC)²`,
+certs:()=>`10 certificates (Nov 2023 to Oct 2026):\nOPSWAT Critical Infrastructure Protection, TestDome HTML/CSS (top 25%), Simplilearn Ethical Hacking 101, WsCube Ethical Hacking masterclass, UrduCourses CyberSavvy, TryHackMe x2, Google, Cisco, (ISC)²`,
 projects:()=>`AI Fitness Coach, Cyber Tools Collection, Password Generator, Digital Clock`,
 contact:()=>`<a href="mailto:codehuzaifa349@gmail.com">codehuzaifa349@gmail.com</a>\n<a href="https://wa.me/923043697071" target="_blank" rel="noopener">WhatsApp</a>`,
 scan:()=>{['22/tcp closed','80/tcp '+A('open'),'443/tcp '+A('open'),'Result: 0 vulnerabilities. Hire him anyway.'].forEach((l,i)=>setTimeout(()=>{out.insertAdjacentHTML('beforeend',l+'\n');out.scrollTop=1e5},400*(i+1)));return'Scanning huzaifa.dev ...'},

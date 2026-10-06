@@ -8,7 +8,7 @@ Personal portfolio of **Muhammad Huzaifa Khan**, a web developer and ethical hac
 - 3D-tilt cards with cursor spotlight, magnetic buttons and a ring cursor
 - Live project previews (password generator, clock, port scan)
 - "Hack my portfolio" mini CTF with 3 levels
-- Certificate showcase: TestDome HTML/CSS (top 25%), UrduCourses CyberSavvy, a WsCube Tech masterclass and a Simplilearn ethical hacking course, each with a click-to-enlarge preview (verify links where the issuer provides one)
+- Certificates: year-grouped grid of equal cards with thumbnails (compact cards for certificates without an image), a "Verifiable online" filter, and a lightbox with captions and arrow-key navigation
 - Scroll progress bar, reveal animations, tech marquee
 - Responsive, keyboard-friendly, respects reduced-motion settings
 
@@ -17,10 +17,8 @@ Personal portfolio of **Muhammad Huzaifa Khan**, a web developer and ethical hac
 huzaifa-portfolio/
 ├── index.html
 ├── favicon.svg
-├── img/testdome-html-css-certificate.webp
-├── img/urducourses-cybersavvy-certificate.webp
-├── img/wscube-ethical-hacking-certificate.webp
-├── img/simplilearn-ethical-hacking-101-certificate.webp
+├── img/                     certificate images (full size, opened in the lightbox)
+│   └── thumbs/              small versions shown in the grid
 ├── css/style.css
 ├── js/main.js
 └── README.md
@@ -39,7 +37,7 @@ Open `index.html` in your browser. No build step or dependencies needed.
 - Text and links: edit `index.html`
 - Colors: change the variables at the top of `css/style.css` (`--v`, `--a`, `--c`)
 - Terminal commands and CTF flags: edit `js/main.js`
-- Add another certificate: save its image in `img/` and copy the `.feat` block in `index.html`
+- Add another certificate: save the full image in `img/` and a ~640px wide copy in `img/thumbs/`, then copy a `.ct-card` block into the right year group in `index.html` (a certificate without an image uses the compact `.ct-card--lite` version, kept inside a `.ct-stack`)
 
 ## Contact
 - Email: codehuzaifa349@gmail.com
